@@ -74,7 +74,7 @@ abstract class SessionNamespace {
     }
 
     /**
-     * Ensure session is initialized and namespace exists.
+     * Ensure session is initialised and namespace exists.
      *
      * @return void
      */
