@@ -24,6 +24,38 @@ declare(strict_types=1);
 
 namespace Inane\Session;
 
+use function array_merge;
+use function ini_get;
+use function ini_set;
+use function session_name;
+use function session_start;
+use function session_status;
+use function session_gc;
+use function session_id;
+use function session_destroy;
+use function session_get_cookie_params;
+use function session_regenerate_id;
+use function sys_get_temp_dir;
+use function is_dir;
+use function file_exists;
+use function filesize;
+use function fopen;
+use function fread;
+use function fclose;
+use function strlen;
+use function strpos;
+use function unlink;
+use function setcookie;
+use function error_log;
+use function file_put_contents;
+use function explode;
+use function intval;
+use function time;
+
+use const DIRECTORY_SEPARATOR;
+use const PHP_SESSION_NONE;
+use Error;
+
 use Inane\Stdlib\Exception\InvalidArgumentException;
 use Inane\Stdlib\Exception\RuntimeException;
 

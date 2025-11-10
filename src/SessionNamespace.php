@@ -24,6 +24,9 @@ declare(strict_types=1);
 
 namespace Inane\Session;
 
+use function defined;
+use function class_exists;
+
 use Inane\Stdlib\Exception\RuntimeException;
 
 /**
