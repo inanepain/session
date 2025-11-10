@@ -3,7 +3,7 @@
 /**
  * Inane: Session
  *
- * Inane Session Library
+ * A lightweight, secure and extensible PHP session handling library.
  *
  * $Id$
  * $Date$
@@ -12,7 +12,7 @@
  *
  * @author Philip Michael Raab <philip@cathedral.co.za>
  * @package inanepain\session
- * @category websocket
+ * @category session
  *
  * @license UNLICENSE
  * @license https://unlicense.org/UNLICENSE UNLICENSE
@@ -28,7 +28,7 @@ use Inane\Stdlib\Exception\InvalidArgumentException;
 use Inane\Stdlib\Exception\RuntimeException;
 
 /**
- * SessionManager - A lightweight, secure and extensible PHP session handling library.
+ * SessionManager
  *
  * Features
  * --------
@@ -38,9 +38,8 @@ use Inane\Stdlib\Exception\RuntimeException;
  * - Flash messages (one-request lifespan)
  * - Namespaced storage to avoid key collisions
  * - Configurable inactivity timeout with automatic logout
- * - **NEW**: 'remember_me' support for persistent sessions (survives browser close)
- * - **FIXED**: Infinite loop in `set()` → `updateActivity()` by direct session write
- * - **ENHANCED**: Robust pre-start session file validation & auto-clear for memory safety
+ * - 'remember_me' support for persistent sessions (survives browser close)
+ * - Robust pre-start session file validation & auto-clear for memory safety
  * - PSR-style static API, type-hinted, fully PHPDoc-ed
  *
  * @version   1.0.0
@@ -61,10 +60,7 @@ class SessionManager {
     /** @var int Session-ID regeneration interval in seconds (default 10 min) */
     private static int $regenerateInterval = 600;
 
-    /* -----------------------------------------------------------------
-     *  INITIALISATION
-     * ----------------------------------------------------------------- */
-
+    #region Initialisation
     /**
      * Initialise the session with secure defaults.
      *
@@ -244,11 +240,9 @@ class SessionManager {
             setcookie($name, '', time() - 42000, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
         }
     }
+    #endregion Initialisation
 
-    /* -----------------------------------------------------------------
-     *  REMEMBER ME UTILITIES
-     * ----------------------------------------------------------------- */
-
+    #region Remember me utilities
     /**
      * Enable "remember me" for the current session (persists after browser close).
      *
@@ -286,11 +280,9 @@ class SessionManager {
         self::ensureInitialized();
         return (int) ini_get('session.cookie_lifetime') > 0;
     }
+    #endregion Remember me utilities
 
-    /* -----------------------------------------------------------------
-     *  NAMESPACE HANDLING
-     * ----------------------------------------------------------------- */
-
+    #region Namespace handling
     /**
      * Switch the active namespace.
      *
@@ -322,11 +314,9 @@ class SessionManager {
     public static function currentNamespace(): string {
         return self::$namespace;
     }
+    #endregion Namespace handling
 
-    /* -----------------------------------------------------------------
-     *  BASIC GET / SET
-     * ----------------------------------------------------------------- */
-
+    #region Basic Get / Set
     /**
      * Store a value in the current namespace.
      *
@@ -382,11 +372,9 @@ class SessionManager {
         self::ensureInitialized();
         unset($_SESSION[self::$namespace][$key]);
     }
+    #endregion Basic Get / Set
 
-    /* -----------------------------------------------------------------
-     *  FLASH MESSAGES (one-request lifespan)
-     * ----------------------------------------------------------------- */
-
+    #region Flash Messages
     /**
      * Store a flash value – available only for the **next** request.
      *
@@ -442,11 +430,9 @@ class SessionManager {
             unset($_SESSION[self::$flashKey]);
         }
     }
+    #endregion Flash Messages
 
-    /* -----------------------------------------------------------------
-     *  SESSION REGENERATION
-     * ----------------------------------------------------------------- */
-
+    #region Session Regeneration
     /**
      * Force a new session ID.
      *
@@ -487,11 +473,9 @@ class SessionManager {
     public static function setRegenerateInterval(int $seconds): void {
         self::$regenerateInterval = $seconds > 60 ? $seconds : 600;
     }
+    #endregion Session Regeneration
 
-    /* -----------------------------------------------------------------
-     *  TIMEOUT HANDLING
-     * ----------------------------------------------------------------- */
-
+    #region Timeout handling
     /**
      * Set inactivity timeout.
      *
@@ -528,11 +512,9 @@ class SessionManager {
         self::ensureInitialized();
         $_SESSION[self::$namespace]['__last_activity__'] = time();
     }
+    #endregion Timeout handling
 
-    /* -----------------------------------------------------------------
-     *  SESSION DESTRUCTION / UTILITIES
-     * ----------------------------------------------------------------- */
-
+    #region Destruction / Utilities
     /**
      * Completely destroy the session and delete the cookie.
      *
@@ -589,11 +571,9 @@ class SessionManager {
         self::ensureInitialized();
         return session_id();
     }
+    #endregion Destruction / Utilities
 
-    /* -----------------------------------------------------------------
-     *  INTERNAL HELPERS
-     * ----------------------------------------------------------------- */
-
+    #region Internal Helpers
     /**
      * Throw if `init()` has not been called.
      *
@@ -611,4 +591,5 @@ class SessionManager {
             $_SESSION[self::$namespace] = [];
         }
     }
+    #endregion Internal Helpers
 }
