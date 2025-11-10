@@ -1,0 +1,39 @@
+= Configuration
+
+Pass options to `init()` to customize behaviour. Defaults are secure.
+
+[options="header"]
+|===
+| Option | Type | Default | Description
+| cookie_lifetime | int | 0 | Cookie expiry (0 = browser close; >0 for persistent).
+| cookie_path | string | / | Cookie path.
+| cookie_domain | string | '' | Cookie domain.
+| cookie_secure | bool | HTTPS detected | HTTPS-only cookie.
+| cookie_httponly | bool | true | Prevent JS access.
+| cookie_samesite | string | Lax | CSRF protection (Lax/Strict/None).
+| use_strict_mode | bool | true | Reject uninit sessions.
+| use_only_cookies | bool | true | No URL param fallback.
+| name | string | PHPSESSID | Session cookie name.
+| gc_maxlifetime | int | 1440 | Garbage collection (minutes).
+| memory_limit | string | null | Temp boost (e.g., '2G'; dev only).
+| max_session_size | int | 104857600 | Clear if >100MB (bytes).
+| force_clear | bool | false | Nuke session on init (dev).
+| remember_me | bool | false | Auto-set lifetime to 30 days.
+|===
+
+Example with persistent session:
+[source,php]
+----
+SessionManager::init([
+    'remember_me' => true,  // 30-day cookie
+    // 'cookie_secure' => true,
+]);
+----
+
+Runtime toggles:
+[source,php]
+----
+SessionManager::enableRememberMe(86400 * 7);  // 1 week
+SessionManager::disableRememberMe();  // Back to session-only
+echo SessionManager::isRememberMe() ? 'Persistent' : 'Temporary';
+----

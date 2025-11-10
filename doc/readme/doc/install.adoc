@@ -1,0 +1,7 @@
+= Install (Composer Recommended)
+
+Add to your `composer.json`:
+[source,shell]
+====
+$ composer require {pkg-id}
+====

@@ -1,0 +1,29 @@
+= Changelog: inanepain/id-forge
+:author: Philip Michael Raab
+:email: <philip@cathedral.co.za>
+:keywords: inanepain, library, session, secure, remember me
+:description: A lightweight, secure and extensible PHP session handling library.
+:revnumber: 0.1.0
+:revdate: 2025-11-10
+:copyright: Unlicense
+:experimental:
+:hide-uri-scheme:
+:icons: font
+:source-highlighter: highlight.js
+:sectnums!:
+:toc: auto
+:sectanchors:
+
+== History
+
+:leveloffset: +2
+
+= 0.1.0-dev (2025 Nov xx)
+:revnumber: 0.1.0
+:revdate: 2025-11-xx
+:revremark: -dev
+
+* initial release
+
+:leveloffset!:
+// include::./release/0.1.0.adoc[leveloffset=+2]

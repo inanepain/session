@@ -1,0 +1,6 @@
+= 0.1.0-dev (2025 Nov xx)
+:revnumber: 0.1.0
+:revdate: 2025-11-xx
+:revremark: -dev
+
+* initial release

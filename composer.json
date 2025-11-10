@@ -1,0 +1,75 @@
+{
+    "name": "inanepain/session",
+    "description": "A lightweight, secure and extensible PHP session handling library.",
+    "type": "library",
+    "license": "Unlicense",
+    "homepage": "https://github.com/inanepain/session",
+    "readme": "README.md",
+    "authors": [
+        {
+            "name": "Philip Michael Raab",
+            "email": "philip@cathedral.co.za",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+        "email": "philip@cathedral.co.za",
+        "issues": "https://github.com/inanepain"
+    },
+    "keywords": [
+        "inane",
+        "inanepain",
+        "library",
+        "session",
+        "secure",
+        "remember me"
+    ],
+    "autoload": {
+        "psr-4": {
+            "Inane\\Session\\": "src/"
+        }
+    },
+    "config": {
+        "preferred-install": "dist",
+        "optimize-autoloader": true,
+        "discard-changes": true,
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=8.4",
+        "inanepain/stdlib": "*",
+        "inanepain/datetime": "*"
+    },
+    "require-dev": {},
+    "scripts": {
+        "mk-doc-dir": [
+            "mkdir -p doc/{changelog,readme}",
+            "mkdir -p doc/changelog/release",
+            "mkdir -p doc/readme/part",
+            "touch doc/{changelog,readme}/index.adoc",
+            "touch doc/changelog/release/0.0.0.adoc",
+            "touch doc/readme/part/install.adoc"
+        ],
+        "build": [
+            "@build-changelog",
+            "@build-readme"
+        ],
+        "build-changelog": [
+            "rm -f CHANGELOG.adoc",
+            "asciidoctor-reducer -o CHANGELOG.adoc doc/changelog/index.adoc",
+            "asciidoctor -b docbook CHANGELOG.adoc",
+            "rm -f CHANGELOG.md",
+            "pandoc -f docbook -t markdown_strict CHANGELOG.xml -o CHANGELOG.md",
+            "rm -f CHANGELOG.xml"
+        ],
+        "build-readme": [
+            "rm -f README.adoc",
+            "asciidoctor-reducer -o README.adoc doc/readme/index.adoc",
+            "asciidoctor -b docbook README.adoc",
+            "rm -f README.md",
+            "pandoc -f docbook -t markdown_strict README.xml -o README.md",
+            "rm -f README.xml"
+        ]
+    }
+}
