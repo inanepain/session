@@ -4,7 +4,7 @@
     "type": "library",
     "license": "Unlicense",
     "homepage": "https://github.com/inanepain/session",
-    "readme": "README.md",
+    "readme": "README.adoc",
     "authors": [
         {
             "name": "Philip Michael Raab",
