@@ -3,7 +3,7 @@
 /**
  * Inane: Session
  *
- * Inane Session Library
+ * A lightweight, secure and extensible PHP session handling library.
  *
  * $Id$
  * $Date$
@@ -12,7 +12,7 @@
  *
  * @author Philip Michael Raab <philip@cathedral.co.za>
  * @package inanepain\session
- * @category websocket
+ * @category session
  *
  * @license UNLICENSE
  * @license https://unlicense.org/UNLICENSE UNLICENSE
@@ -23,6 +23,9 @@
 declare(strict_types=1);
 
 namespace Inane\Session;
+
+use function defined;
+use function class_exists;
 
 use Inane\Stdlib\Exception\RuntimeException;
 
@@ -39,9 +42,6 @@ use Inane\Stdlib\Exception\RuntimeException;
  * - Default namespace fallback via `getDefaultNamespace()`
  * - Full PHPDoc, IDE-friendly, PSR-compatible
  *
- * @package   SessionManager
- * @author    @inanepain (ZA)
- * @license   MIT
  * @version   1.0.0
  */
 abstract class SessionNamespace {
@@ -74,7 +74,7 @@ abstract class SessionNamespace {
     }
 
     /**
-     * Ensure session is initialized and namespace exists.
+     * Ensure session is initialised and namespace exists.
      *
      * @return void
      */
@@ -90,15 +90,13 @@ abstract class SessionNamespace {
         }
     }
 
-    /* -----------------------------------------------------------------
-     *  CORE SESSION PROXIES (namespaced)
-     * ----------------------------------------------------------------- */
-
+    #region Core session proxies (namespaced)
     /**
      * Set a value in this class's namespace.
      *
      * @param string $key
      * @param mixed  $value
+     * 
      * @return void
      */
     public static function set(string $key, $value): void {
@@ -111,6 +109,7 @@ abstract class SessionNamespace {
      *
      * @param string $key
      * @param mixed  $default
+     * 
      * @return mixed
      */
     public static function get(string $key, $default = null) {
@@ -122,6 +121,7 @@ abstract class SessionNamespace {
      * Check if key exists.
      *
      * @param string $key
+     * 
      * @return bool
      */
     public static function has(string $key): bool {
@@ -133,6 +133,7 @@ abstract class SessionNamespace {
      * Delete a key.
      *
      * @param string $key
+     * 
      * @return void
      */
     public static function delete(string $key): void {
@@ -159,16 +160,15 @@ abstract class SessionNamespace {
         self::boot();
         SessionManager::clear();
     }
+    #endregion Core session proxies (namespaced)
 
-    /* -----------------------------------------------------------------
-     *  FLASH MESSAGES (namespaced)
-     * ----------------------------------------------------------------- */
-
+    #region Flash Messages (namespaced)
     /**
      * Set flash message (one-request only).
      *
      * @param string $key
      * @param mixed  $value
+     * 
      * @return void
      */
     public static function flash(string $key, $value): void {
@@ -181,6 +181,7 @@ abstract class SessionNamespace {
      *
      * @param string $key
      * @param mixed  $default
+     * 
      * @return mixed
      */
     public static function getFlash(string $key, $default = null) {
@@ -192,17 +193,16 @@ abstract class SessionNamespace {
      * Check if flash exists.
      *
      * @param string $key
+     * 
      * @return bool
      */
     public static function hasFlash(string $key): bool {
         self::boot();
         return SessionManager::hasFlash($key);
     }
+    #endregion Flash Messages (namespaced)
 
-    /* -----------------------------------------------------------------
-     *  UTILITIES
-     * ----------------------------------------------------------------- */
-
+    #region Utilities
     /**
      * Get current session ID.
      *
@@ -217,6 +217,7 @@ abstract class SessionNamespace {
      * Regenerate session ID.
      *
      * @param bool $deleteOld
+     * 
      * @return void
      */
     public static function regenerate(bool $deleteOld = true): void {
@@ -233,4 +234,5 @@ abstract class SessionNamespace {
         self::boot();
         SessionManager::destroy();
     }
+    #endregion Utilities
 }

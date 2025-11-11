@@ -3,7 +3,7 @@
 /**
  * Inane: Session
  *
- * Inane Session Library
+ * A lightweight, secure and extensible PHP session handling library.
  *
  * $Id$
  * $Date$
@@ -12,7 +12,7 @@
  *
  * @author Philip Michael Raab <philip@cathedral.co.za>
  * @package inanepain\session
- * @category websocket
+ * @category session
  *
  * @license UNLICENSE
  * @license https://unlicense.org/UNLICENSE UNLICENSE
@@ -24,11 +24,32 @@ declare(strict_types=1);
 
 namespace Inane\Session;
 
-use Inane\Stdlib\Exception\InvalidArgumentException;
-use Inane\Stdlib\Exception\RuntimeException;
+use Inane\Datetime\Timespan;
+use Inane\Stdlib\Exception\{
+    InvalidArgumentException,
+    RuntimeException
+};
+
+use function array_merge;
+use function ini_get;
+use function ini_set;
+use function is_int;
+use function is_string;
+use function session_destroy;
+use function session_get_cookie_params;
+use function session_id;
+use function session_gc;
+use function session_name;
+use function session_regenerate_id;
+use function session_start;
+use function session_status;
+use function setcookie;
+use function time;
+
+use const PHP_SESSION_NONE;
 
 /**
- * SessionManager - A lightweight, secure and extensible PHP session handling library.
+ * SessionManager
  *
  * Features
  * --------
@@ -38,16 +59,14 @@ use Inane\Stdlib\Exception\RuntimeException;
  * - Flash messages (one-request lifespan)
  * - Namespaced storage to avoid key collisions
  * - Configurable inactivity timeout with automatic logout
- * - **NEW**: 'remember_me' support for persistent sessions (survives browser close)
- * - **FIXED**: Infinite loop in `set()` → `updateActivity()` by direct session write
- * - **ENHANCED**: Robust pre-start session file validation & auto-clear for memory safety
+ * - 'remember_me' support for persistent sessions (survives browser close)
  * - PSR-style static API, type-hinted, fully PHPDoc-ed
  *
  * @version   1.0.0
  */
 class SessionManager {
-    /** @var bool Whether the manager has been initialized */
-    private static bool $initialized = false;
+    /** @var bool Whether the manager has been initialised */
+    private static bool $initialised = false;
 
     /** @var string Current namespace (default: 'default') */
     private static string $namespace = 'default';
@@ -61,10 +80,7 @@ class SessionManager {
     /** @var int Session-ID regeneration interval in seconds (default 10 min) */
     private static int $regenerateInterval = 600;
 
-    /* -----------------------------------------------------------------
-     *  INITIALISATION
-     * ----------------------------------------------------------------- */
-
+    #region Initialisation
     /**
      * Initialise the session with secure defaults.
      *
@@ -87,14 +103,11 @@ class SessionManager {
      *     use_only_cookies?: bool,
      *     name?: string,
      *     gc_maxlifetime?: int,
-     *     memory_limit?: string,      // Temp boost e.g., '4G'
-     *     max_session_size?: int,     // Skip/clear if file > this (bytes, default 100MB)
-     *     force_clear?: bool,         // Force-clear session file on init (dev only)
-     *     remember_me?: bool          // NEW: Enable persistent session (30 days lifetime)
+     *     remember_me?: bool          // Enable persistent session (30 days lifetime)
      * } $options
      */
     public static function init(array $options = []): void {
-        if (self::$initialized) {
+        if (self::$initialised) {
             return;
         }
 
@@ -112,22 +125,14 @@ class SessionManager {
             'use_only_cookies' => true,
             'name'            => 'PHPSESSID',
             'gc_maxlifetime'  => 1440,
-            'memory_limit'    => null,                               // Optional temp boost
-            'max_session_size' => 104857600,                          // 100MB threshold
-            'force_clear'     => false,                              // Dev/debug nuke
-            'remember_me'     => false,                              // NEW: Persistent session
+            'remember_me'     => false,                              // Persistent session (cookie_lifetime = 30 days)
         ];
 
         $config = array_merge($defaults, $options);
 
         // NEW: Handle 'remember_me' – set persistent lifetime if enabled
         if ($config['remember_me'] && $config['cookie_lifetime'] === 0) {
-            $config['cookie_lifetime'] = 2592000;  // 30 days in seconds
-        }
-
-        // ENHANCED: Temp memory boost (dev-only; remove in prod)
-        if ($config['memory_limit'] && ini_get('memory_limit') !== $config['memory_limit']) {
-            ini_set('memory_limit', $config['memory_limit']);
+            $config['cookie_lifetime'] = Timespan::fromDuration('30days')->getSeconds();
         }
 
         // -----------------------------------------------------------------
@@ -145,84 +150,16 @@ class SessionManager {
         ini_set('session.cookie_samesite', $config['cookie_samesite']);
         ini_set('session.gc_maxlifetime', (string) $config['gc_maxlifetime']);
 
-        // ENHANCED: Pre-start session file handling (file handler only)
-        $sessionFile = null;
-        if (ini_get('session.save_handler') === 'files') {
-            $savePath = ini_get('session.save_path');
-            if (!$savePath || !is_dir($savePath)) {
-                $savePath = sys_get_temp_dir();  // Fallback
-            }
-            $sessionId = $_COOKIE[$config['name']] ?? null;  // Cookie-based ID pre-start
-            if ($sessionId) {
-                $sessionFile = $savePath . DIRECTORY_SEPARATOR . 'sess_' . $sessionId;
-                if (file_exists($sessionFile)) {
-                    $fileSize = filesize($sessionFile);
-                    $shouldClear = $config['force_clear'] || ($fileSize > $config['max_session_size']);
-                    if ($shouldClear) {
-                        // Validate content length vs size (corruption check)
-                        $handle = fopen($sessionFile, 'rb');
-                        if ($handle) {
-                            $content = fread($handle, min(1024, $fileSize));  // Peek first 1KB
-                            fclose($handle);
-                            if (strlen($content) > $fileSize || (strpos($content, 'O:') === 0 && $fileSize > 50000000)) {  // Suspicious serialized object
-                                $shouldClear = true;
-                            }
-                        }
-                        if ($shouldClear) {
-                            unlink($sessionFile);
-                            setcookie($config['name'], '', time() - 3600, $config['cookie_path'], $config['cookie_domain'], $config['cookie_secure'], $config['cookie_httponly']);
-                            error_log("SessionManager: Cleared problematic session file ({$fileSize} bytes) at {$sessionFile}");
-                            $sessionFile = null;  // Reset for fresh start
-                        }
-                    }
-                }
-            }
+        // -----------------------------------------------------------------
+        // Start the session
+        // -----------------------------------------------------------------
+        if (session_status() === PHP_SESSION_NONE && !session_start()) {
+            throw new RuntimeException('Failed to start the session.');
         }
 
-        // -----------------------------------------------------------------
-        // Start the session with enhanced error handling
-        // -----------------------------------------------------------------
-        if (session_status() === PHP_SESSION_NONE) {
-            $startAttempts = 0;
-            $maxAttempts = 3;
-            while ($startAttempts < $maxAttempts) {
-                try {
-                    if (!session_start()) {
-                        throw new RuntimeException('Failed to start the session.');
-                    }
-                    break;  // Success
-                } catch (Error $e) {
-                    $startAttempts++;
-                    error_log("SessionManager: Start attempt {$startAttempts} failed: " . $e->getMessage());
-                    if (strpos($e->getMessage(), 'Allowed memory size') !== false) {
-                        // ENHANCED: Progressive recovery
-                        if ($sessionFile && file_exists($sessionFile)) {
-                            // Truncate file instead of delete (preserve ID if possible)
-                            file_put_contents($sessionFile, '');
-                            error_log("SessionManager: Truncated oversized session file.");
-                        } else {
-                            self::destroyFallback();
-                        }
-                        // Retry with higher memory if set
-                        if ($startAttempts === 1 && $config['memory_limit']) {
-                            $limitParts = explode('G', $config['memory_limit']);
-                            $newLimit = (intval($limitParts[0]) * 2) . 'G';
-                            ini_set('memory_limit', $newLimit);
-                        }
-                    } else {
-                        throw $e;  // Non-memory error
-                    }
-                }
-            }
-            if ($startAttempts >= $maxAttempts) {
-                throw new RuntimeException('Failed to start session after ' . $maxAttempts . ' recovery attempts.');
-            }
-        }
-
-        // ENHANCED: Force GC to prune expired sessions
         session_gc();
 
-        self::$initialized = true;
+        self::$initialised = true;
 
         // -----------------------------------------------------------------
         // Security housekeeping (now safe post-start)
@@ -231,36 +168,27 @@ class SessionManager {
         self::checkTimeout();         // inactivity timeout
         self::clearFlash();           // remove stale flash data
     }
+    #endregion Initialisation
 
-    // ENHANCED: Fallback destroy (no ensureInitialized dependency)
-    private static function destroyFallback(): void {
-        if (session_id()) {
-            $_SESSION = [];
-            session_destroy();
-        }
-        $params = session_get_cookie_params();
-        $name = session_name();
-        if ($name) {
-            setcookie($name, '', time() - 42000, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
-        }
-    }
-
-    /* -----------------------------------------------------------------
-     *  REMEMBER ME UTILITIES
-     * ----------------------------------------------------------------- */
-
+    #region Remember me utilities
     /**
      * Enable "remember me" for the current session (persists after browser close).
      *
      * Sets cookie_lifetime to 30 days and updates session config.
      * Call after `init()`; regenerates ID for security.
      *
-     * @param int $lifetime Optional custom lifetime in seconds (default: 30 days).
+     * @param int|string|Timespan $lifetime Optional custom lifetime in seconds (default: 30 days).
      *
      * @return void
      */
-    public static function enableRememberMe(int $lifetime = 2592000): void {
-        self::ensureInitialized();
+    public static function enableRememberMe(int|string|Timespan $lifetime = '30days'): void {
+        $lifetime = match(true) {
+            is_int($lifetime) => $lifetime,
+            is_string($lifetime) => Timespan::fromDuration($lifetime)->getSeconds(),
+            default => $lifetime->getSeconds(),
+        };
+
+        self::ensureInitialised();
         ini_set('session.cookie_lifetime', (string) $lifetime);
         self::regenerate(true);  // Regenerate ID on enable for security
     }
@@ -273,7 +201,7 @@ class SessionManager {
      * @return void
      */
     public static function disableRememberMe(): void {
-        self::ensureInitialized();
+        self::ensureInitialised();
         ini_set('session.cookie_lifetime', '0');
     }
 
@@ -283,14 +211,12 @@ class SessionManager {
      * @return bool
      */
     public static function isRememberMe(): bool {
-        self::ensureInitialized();
+        self::ensureInitialised();
         return (int) ini_get('session.cookie_lifetime') > 0;
     }
+    #endregion Remember me utilities
 
-    /* -----------------------------------------------------------------
-     *  NAMESPACE HANDLING
-     * ----------------------------------------------------------------- */
-
+    #region Namespace handling
     /**
      * Switch the active namespace.
      *
@@ -304,7 +230,7 @@ class SessionManager {
      * @throws InvalidArgumentException If namespace is empty.
      */
     public static function namespace(string $namespace): void {
-        self::ensureInitialized();
+        self::ensureInitialised();
         if ($namespace === '') {
             throw new InvalidArgumentException('Namespace cannot be empty.');
         }
@@ -322,11 +248,9 @@ class SessionManager {
     public static function currentNamespace(): string {
         return self::$namespace;
     }
+    #endregion Namespace handling
 
-    /* -----------------------------------------------------------------
-     *  BASIC GET / SET
-     * ----------------------------------------------------------------- */
-
+    #region Basic Get / Set
     /**
      * Store a value in the current namespace.
      *
@@ -338,7 +262,7 @@ class SessionManager {
      * @throws InvalidArgumentException If key is empty.
      */
     public static function set(string $key, $value): void {
-        self::ensureInitialized();
+        self::ensureInitialised();
         if ($key === '') {
             throw new InvalidArgumentException('Session key cannot be empty.');
         }
@@ -355,7 +279,7 @@ class SessionManager {
      * @return mixed
      */
     public static function get(string $key, $default = null) {
-        self::ensureInitialized();
+        self::ensureInitialised();
         return $_SESSION[self::$namespace][$key] ?? $default;
     }
 
@@ -367,7 +291,7 @@ class SessionManager {
      * @return bool
      */
     public static function has(string $key): bool {
-        self::ensureInitialized();
+        self::ensureInitialised();
         return isset($_SESSION[self::$namespace][$key]);
     }
 
@@ -379,14 +303,12 @@ class SessionManager {
      * @return void
      */
     public static function delete(string $key): void {
-        self::ensureInitialized();
+        self::ensureInitialised();
         unset($_SESSION[self::$namespace][$key]);
     }
+    #endregion Basic Get / Set
 
-    /* -----------------------------------------------------------------
-     *  FLASH MESSAGES (one-request lifespan)
-     * ----------------------------------------------------------------- */
-
+    #region Flash Messages
     /**
      * Store a flash value – available only for the **next** request.
      *
@@ -396,7 +318,7 @@ class SessionManager {
      * @return void
      */
     public static function flash(string $key, $value): void {
-        self::ensureInitialized();
+        self::ensureInitialised();
         if (!isset($_SESSION[self::$flashKey])) {
             $_SESSION[self::$flashKey] = [];
         }
@@ -412,7 +334,7 @@ class SessionManager {
      * @return mixed
      */
     public static function getFlash(string $key, $default = null) {
-        self::ensureInitialized();
+        self::ensureInitialised();
         $value = $_SESSION[self::$flashKey][$key] ?? $default;
         unset($_SESSION[self::$flashKey][$key]);
         return $value;
@@ -426,7 +348,7 @@ class SessionManager {
      * @return bool
      */
     public static function hasFlash(string $key): bool {
-        self::ensureInitialized();
+        self::ensureInitialised();
         return isset($_SESSION[self::$flashKey][$key]);
     }
 
@@ -442,11 +364,9 @@ class SessionManager {
             unset($_SESSION[self::$flashKey]);
         }
     }
+    #endregion Flash Messages
 
-    /* -----------------------------------------------------------------
-     *  SESSION REGENERATION
-     * ----------------------------------------------------------------- */
-
+    #region Session Regeneration
     /**
      * Force a new session ID.
      *
@@ -455,7 +375,7 @@ class SessionManager {
      * @return void
      */
     public static function regenerate(bool $deleteOld = true): void {
-        self::ensureInitialized();
+        self::ensureInitialised();
         session_regenerate_id($deleteOld);
         self::updateActivity();
     }
@@ -487,11 +407,9 @@ class SessionManager {
     public static function setRegenerateInterval(int $seconds): void {
         self::$regenerateInterval = $seconds > 60 ? $seconds : 600;
     }
+    #endregion Session Regeneration
 
-    /* -----------------------------------------------------------------
-     *  TIMEOUT HANDLING
-     * ----------------------------------------------------------------- */
-
+    #region Timeout handling
     /**
      * Set inactivity timeout.
      *
@@ -525,21 +443,19 @@ class SessionManager {
      * @return void
      */
     private static function updateActivity(): void {
-        self::ensureInitialized();
+        self::ensureInitialised();
         $_SESSION[self::$namespace]['__last_activity__'] = time();
     }
+    #endregion Timeout handling
 
-    /* -----------------------------------------------------------------
-     *  SESSION DESTRUCTION / UTILITIES
-     * ----------------------------------------------------------------- */
-
+    #region Destruction / Utilities
     /**
      * Completely destroy the session and delete the cookie.
      *
      * @return void
      */
     public static function destroy(): void {
-        self::ensureInitialized();
+        self::ensureInitialised();
 
         $_SESSION = [];
 
@@ -557,7 +473,7 @@ class SessionManager {
         }
 
         session_destroy();
-        self::$initialized = false;
+        self::$initialised = false;
     }
 
     /**
@@ -566,7 +482,7 @@ class SessionManager {
      * @return array<string,mixed>
      */
     public static function all(): array {
-        self::ensureInitialized();
+        self::ensureInitialised();
         return $_SESSION[self::$namespace] ?? [];
     }
 
@@ -576,7 +492,7 @@ class SessionManager {
      * @return void
      */
     public static function clear(): void {
-        self::ensureInitialized();
+        self::ensureInitialised();
         $_SESSION[self::$namespace] = [];
     }
 
@@ -586,14 +502,12 @@ class SessionManager {
      * @return string
      */
     public static function id(): string {
-        self::ensureInitialized();
+        self::ensureInitialised();
         return session_id();
     }
+    #endregion Destruction / Utilities
 
-    /* -----------------------------------------------------------------
-     *  INTERNAL HELPERS
-     * ----------------------------------------------------------------- */
-
+    #region Internal Helpers
     /**
      * Throw if `init()` has not been called.
      *
@@ -601,14 +515,15 @@ class SessionManager {
      *
      * @throws RuntimeException
      */
-    private static function ensureInitialized(): void {
-        if (!self::$initialized) {
+    private static function ensureInitialised(): void {
+        if (!self::$initialised) {
             throw new RuntimeException(
-                'SessionManager must be initialized with SessionManager::init() before use.'
+                'SessionManager must be initialised with SessionManager::init() before use.'
             );
         }
         if (!isset($_SESSION[self::$namespace])) {
             $_SESSION[self::$namespace] = [];
         }
     }
+    #endregion Internal Helpers
 }
