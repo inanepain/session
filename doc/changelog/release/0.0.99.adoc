@@ -1,0 +1,5 @@
+= 0.0.99 (2025 Nov 10)
+:revnumber: 0.0.00
+:revdate: 2025-11-10
+
+* release candidate.

@@ -1,4 +1,4 @@
-= Changelog: inanepain/id-forge
+= Changelog: inanepain/session
 :author: Philip Michael Raab
 :email: <philip@cathedral.co.za>
 :keywords: inanepain, library, session, secure, remember me
@@ -17,4 +17,4 @@
 == History
 
 include::./release/0.0.0.adoc[leveloffset=+2]
-// include::./release/0.1.0.adoc[leveloffset=+2]
+include::./release/0.0.99.adoc[leveloffset=+2]
