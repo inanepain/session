@@ -24,7 +24,10 @@
 {description}
 
 :sectnums:
-== Introduction
+<<<
+:leveloffset: +1
+
+= Introduction
 
 SessionManager is a lightweight, secure, and extensible PHP session handling library designed for modern web applications.
 It provides a simple static API for managing sessions with built-in security features like HTTP-only cookies, SameSite protection,
@@ -41,12 +44,12 @@ Key features:
 
 This library is dependency-free, PSR-compliant, and production-ready.
 
-=== Why SessionManager?
+== Why SessionManager?
 Native PHP sessions are powerful but lack secure defaults and organization.
 SessionManager wraps `session_*` functions with best practices, preventing common pitfalls like fixation attacks and key conflicts.
 
+:leveloffset!:
 <<<
-
 :leveloffset: +1
 
 = Install (Composer Recommended)
@@ -58,12 +61,12 @@ $ composer require {pkg-id}
 ====
 
 :leveloffset!:
-
 <<<
+:leveloffset: +1
 
-== Quick Start
+= Quick Start
 
-=== Basic Usage
+== Basic Usage
 Require the file and initialize:
 
 [source,php]
@@ -92,7 +95,7 @@ if (SessionManager::hasFlash('success')) {
 SessionManager::destroy();
 ----
 
-=== Namespaced Sessions
+== Namespaced Sessions
 Use the base class `SessionNamespace` for modular access:
 
 [source,php]
@@ -113,8 +116,8 @@ CartSession::set('items', ['item1']);
 echo UserSession::get('id');  // 456
 ----
 
+:leveloffset!:
 <<<
-
 :leveloffset: +1
 
 = Configuration
@@ -158,21 +161,21 @@ echo SessionManager::isRememberMe() ? 'Persistent' : 'Temporary';
 ----
 
 :leveloffset!:
-
 <<<
+:leveloffset: +1
 
-== API Reference
+= API Reference
 
 All methods are static. Call `init()` first.
 
-=== Initialization
+== Initialization
 [cols="2,3a"]
 |===
 | Method | Description
 | `init(array $options = []): void` | Start session with config. Idempotent.
 |===
 
-=== Core Storage
+== Core Storage
 [cols="2,3a"]
 |===
 | Method | Description
@@ -184,7 +187,7 @@ All methods are static. Call `init()` first.
 | `clear(): void` | Empty current namespace.
 |===
 
-=== Namespacing
+== Namespacing
 [cols="2,3a"]
 |===
 | Method | Description
@@ -192,7 +195,7 @@ All methods are static. Call `init()` first.
 | `currentNamespace(): string` | Active namespace.
 |===
 
-=== Flash Messages
+== Flash Messages
 [cols="2,3a"]
 |===
 | Method | Description
@@ -201,7 +204,7 @@ All methods are static. Call `init()` first.
 | `hasFlash(string $key): bool` | Exists? (non-destructive).
 |===
 
-=== Security & Lifecycle
+== Security & Lifecycle
 [cols="2,3a"]
 |===
 | Method | Description
@@ -212,7 +215,7 @@ All methods are static. Call `init()` first.
 | `id(): string` | Raw session ID.
 |===
 
-=== Remember Me
+== Remember Me
 [cols="2,3a"]
 |===
 | Method | Description
@@ -221,9 +224,13 @@ All methods are static. Call `init()` first.
 | `isRememberMe(): bool` | Currently persistent?
 |===
 
-== Examples
+:leveloffset!:
+<<<
+:leveloffset: +1
 
-=== Login with Remember Me
+= Examples
+
+== Login with Remember Me
 [source,php]
 ----
 SessionManager::init(['remember_me' => $_POST['remember'] ?? false]);
@@ -238,7 +245,7 @@ if (authenticate($_POST['email'], $_POST['password'])) {
 }
 ----
 
-=== Namespaced E-Commerce
+== Namespaced E-Commerce
 [source,php]
 ----
 UserSession::set('logged_in', true);
@@ -247,7 +254,11 @@ echo CartSession::all();  // ['total' => 99.99]
 SessionManager::namespace('user');  // Switch back
 ----
 
-== Security Considerations
+:leveloffset!:
+<<<
+:leveloffset: +1
+
+= Security Considerations
 
 * **Defaults**: HTTP-only, SameSite=Lax, strict mode enabled.
 * **Regeneration**: Auto every 10min; manual via `regenerate()`.
@@ -255,3 +266,5 @@ SessionManager::namespace('user');  // Switch back
 * **Persistent Sessions**: Use secure cookies; validate user on resume (e.g., DB token).
 * **Large Data**: Avoid storing files/objects; use DB/Redis for >1MB.
 * **File Handler**: Auto-clears oversized/corrupt sessions; consider Redis for scale.
+
+:leveloffset!:

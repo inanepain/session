@@ -1,0 +1,8 @@
+= Security Considerations
+
+* **Defaults**: HTTP-only, SameSite=Lax, strict mode enabled.
+* **Regeneration**: Auto every 10min; manual via `regenerate()`.
+* **Timeouts**: 30min inactivity → auto-destroy.
+* **Persistent Sessions**: Use secure cookies; validate user on resume (e.g., DB token).
+* **Large Data**: Avoid storing files/objects; use DB/Redis for >1MB.
+* **File Handler**: Auto-clears oversized/corrupt sessions; consider Redis for scale.

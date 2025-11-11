@@ -1,0 +1,20 @@
+= Introduction
+
+SessionManager is a lightweight, secure, and extensible PHP session handling library designed for modern web applications.
+It provides a simple static API for managing sessions with built-in security features like HTTP-only cookies, SameSite protection,
+periodic ID regeneration, and inactivity timeouts. It supports namespacing to avoid key collisions and "remember me" functionality
+for persistent sessions across browser closes.
+
+Key features:
+* Automatic secure session initialization.
+* Namespaced storage to organize data (e.g., user, cart).
+* Flash messages for one-time notifications.
+* Configurable timeouts and regeneration intervals.
+* Memory-safe handling for large sessions.
+* Persistent sessions via "remember me" (30-day default).
+
+This library is dependency-free, PSR-compliant, and production-ready.
+
+== Why SessionManager?
+Native PHP sessions are powerful but lack secure defaults and organization.
+SessionManager wraps `session_*` functions with best practices, preventing common pitfalls like fixation attacks and key conflicts.
