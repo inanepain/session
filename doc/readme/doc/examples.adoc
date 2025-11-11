@@ -1,0 +1,25 @@
+= Examples
+
+== Login with Remember Me
+[source,php]
+----
+SessionManager::init(['remember_me' => $_POST['remember'] ?? false]);
+
+if (authenticate($_POST['email'], $_POST['password'])) {
+    SessionManager::set('user_id', $user->id);
+    SessionManager::enableRememberMe();  // If checkbox checked
+    SessionManager::flash('success', 'Welcome!');
+    header('Location: /dashboard');
+} else {
+    SessionManager::flash('error', 'Invalid credentials');
+}
+----
+
+== Namespaced E-Commerce
+[source,php]
+----
+UserSession::set('logged_in', true);
+CartSession::set('total', 99.99);
+echo CartSession::all();  // ['total' => 99.99]
+SessionManager::namespace('user');  // Switch back
+----

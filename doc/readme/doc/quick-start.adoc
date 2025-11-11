@@ -1,0 +1,51 @@
+= Quick Start
+
+== Basic Usage
+Require the file and initialize:
+
+[source,php]
+----
+SessionManager::init([
+    'name' => 'MYAPP_SESSID',
+    // 'cookie_secure' => true,  // HTTPS only
+    'cookie_samesite' => 'Strict',
+]);
+
+// Set and get data
+SessionManager::set('user_id', 123);
+echo SessionManager::get('user_id');  // 123
+
+// Flash message
+SessionManager::flash('success', 'Login successful!');
+header('Location: /dashboard');
+exit;
+
+// In dashboard.php
+if (SessionManager::hasFlash('success')) {
+    echo SessionManager::getFlash('success');
+}
+
+// Logout
+SessionManager::destroy();
+----
+
+== Namespaced Sessions
+Use the base class `SessionNamespace` for modular access:
+
+[source,php]
+----
+class UserSession extends SessionNamespace
+{
+    protected const NAMESPACE = 'user';
+}
+
+class CartSession extends SessionNamespace
+{
+    protected const NAMESPACE = 'cart';
+}
+
+// Usage
+UserSession::set('id', 456);
+CartSession::set('items', ['item1']);
+echo UserSession::get('id');  // 456
+----

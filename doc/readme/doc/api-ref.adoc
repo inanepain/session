@@ -1,0 +1,59 @@
+= API Reference
+
+All methods are static. Call `init()` first.
+
+== Initialization
+[cols="2,3a"]
+|===
+| Method | Description
+| `init(array $options = []): void` | Start session with config. Idempotent.
+|===
+
+== Core Storage
+[cols="2,3a"]
+|===
+| Method | Description
+| `set(string $key, mixed $value): void` | Store value; updates activity.
+| `get(string $key, mixed $default = null): mixed` | Retrieve value.
+| `has(string $key): bool` | Key exists?
+| `delete(string $key): void` | Remove key.
+| `all(): array` | All namespace data.
+| `clear(): void` | Empty current namespace.
+|===
+
+== Namespacing
+[cols="2,3a"]
+|===
+| Method | Description
+| `namespace(string $namespace): void` | Switch namespace.
+| `currentNamespace(): string` | Active namespace.
+|===
+
+== Flash Messages
+[cols="2,3a"]
+|===
+| Method | Description
+| `flash(string $key, mixed $value): void` | Set for next request.
+| `getFlash(string $key, mixed $default = null): mixed` | Get and erase.
+| `hasFlash(string $key): bool` | Exists? (non-destructive).
+|===
+
+== Security & Lifecycle
+[cols="2,3a"]
+|===
+| Method | Description
+| `regenerate(bool $deleteOld = true): void` | New ID; updates activity.
+| `setRegenerateInterval(int $seconds): void` | Interval (min 60s).
+| `setTimeout(int $seconds): void` | Inactivity timeout (min 1s).
+| `destroy(): void` | Full logout (clears data/cookie).
+| `id(): string` | Raw session ID.
+|===
+
+== Remember Me
+[cols="2,3a"]
+|===
+| Method | Description
+| `enableRememberMe(int $lifetime = 2592000): void` | Enable persistent (regenerates ID).
+| `disableRememberMe(): void` | Disable (session-only).
+| `isRememberMe(): bool` | Currently persistent?
+|===
