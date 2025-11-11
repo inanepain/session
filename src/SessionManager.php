@@ -65,6 +65,7 @@ use const PHP_SESSION_NONE;
  * @version   1.0.0
  */
 class SessionManager {
+    #region Properties
     /** @var bool Whether the manager has been initialised */
     private static bool $initialised = false;
 
@@ -79,6 +80,7 @@ class SessionManager {
 
     /** @var int Session-ID regeneration interval in seconds (default 10 min) */
     private static int $regenerateInterval = 600;
+    #endregion Properties
 
     #region Initialisation
     /**
@@ -107,13 +109,8 @@ class SessionManager {
      * } $options
      */
     public static function init(array $options = []): void {
-        if (self::$initialised) {
-            return;
-        }
+        if (self::$initialised) return;
 
-        // -----------------------------------------------------------------
-        // Default secure configuration + ENHANCED options
-        // -----------------------------------------------------------------
         $defaults = [
             'cookie_lifetime' => 0,                                 // 0 = expires on browser close
             'cookie_path'     => '/',
