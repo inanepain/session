@@ -27,28 +27,28 @@
 
 <<<
 
-include::./doc/intro.adoc[leveloffset=+1]
+include::./part/intro.adoc[leveloffset=+1]
 
 <<<
 
-include::./doc/install.adoc[leveloffset=+1]
+include::./part/install.adoc[leveloffset=+1]
 
 <<<
 
-include::./doc/quick-start.adoc[leveloffset=+1]
+include::./part/quick-start.adoc[leveloffset=+1]
 
 <<<
 
-include::./doc/config.adoc[leveloffset=+1]
+include::./part/config.adoc[leveloffset=+1]
 
 <<<
 
-include::./doc/api-ref.adoc[leveloffset=+1]
+include::./part/api-ref.adoc[leveloffset=+1]
 
 <<<
 
-include::./doc/examples.adoc[leveloffset=+1]
+include::./part/examples.adoc[leveloffset=+1]
 
 <<<
 
-include::./doc/security.adoc[leveloffset=+1]
+include::./part/security.adoc[leveloffset=+1]
