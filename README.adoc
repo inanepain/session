@@ -1,8 +1,9 @@
-= session
+= inanepain/session image:./icon.png[title=inanepain/session,25]
 :author: Philip Michael Raab
 :email: <philip@cathedral.co.za>
-:keywords: inanepain, library, session, secure, remember me
 :description: A lightweight, secure and extensible PHP session handling library.
+:keywords: inanepain, library, session, secure, remember me
+:homepage: https://github.com/inanepain/session
 :revnumber: 0.1.0
 :revdate: 2025-11-10
 :copyright: Unlicense
@@ -24,7 +25,9 @@
 {description}
 
 :sectnums:
+
 <<<
+
 :leveloffset: +1
 
 = Introduction
@@ -49,7 +52,9 @@ Native PHP sessions are powerful but lack secure defaults and organization.
 SessionManager wraps `session_*` functions with best practices, preventing common pitfalls like fixation attacks and key conflicts.
 
 :leveloffset!:
+
 <<<
+
 :leveloffset: +1
 
 = Install (Composer Recommended)
@@ -61,7 +66,9 @@ $ composer require {pkg-id}
 ====
 
 :leveloffset!:
+
 <<<
+
 :leveloffset: +1
 
 = Quick Start
@@ -117,7 +124,9 @@ echo UserSession::get('id');  // 456
 ----
 
 :leveloffset!:
+
 <<<
+
 :leveloffset: +1
 
 = Configuration
@@ -161,7 +170,9 @@ echo SessionManager::isRememberMe() ? 'Persistent' : 'Temporary';
 ----
 
 :leveloffset!:
+
 <<<
+
 :leveloffset: +1
 
 = API Reference
@@ -225,7 +236,9 @@ All methods are static. Call `init()` first.
 |===
 
 :leveloffset!:
+
 <<<
+
 :leveloffset: +1
 
 = Examples
@@ -255,7 +268,9 @@ SessionManager::namespace('user');  // Switch back
 ----
 
 :leveloffset!:
+
 <<<
+
 :leveloffset: +1
 
 = Security Considerations
