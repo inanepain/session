@@ -57,13 +57,13 @@ SessionManager wraps `session_*` functions with best practices, preventing commo
 
 :leveloffset: +1
 
-= Install (Composer Recommended)
+= Install
 
-Add to your `composer.json`:
-[source,shell]
-====
-$ composer require {pkg-id}
-====
+.composer
+[source,shell,subs=attributes+]
+----
+composer require {pkg-id}
+----
 
 :leveloffset!:
 
