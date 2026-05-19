@@ -8,7 +8,7 @@
  * $Id$
  * $Date$
  *
- * PHP version 8.4
+ * PHP version 8.5
  *
  * @author Philip Michael Raab <philip@cathedral.co.za>
  * @package inanepain\session
@@ -24,10 +24,10 @@ declare(strict_types=1);
 
 namespace Inane\Session;
 
-use function defined;
-use function class_exists;
-
 use Inane\Stdlib\Exception\RuntimeException;
+
+use function class_exists;
+use function defined;
 
 /**
  * SessionNamespace - Abstract base class for namespaced session access.
@@ -96,7 +96,7 @@ abstract class SessionNamespace {
      *
      * @param string $key
      * @param mixed  $value
-     * 
+     *
      * @return void
      */
     public static function set(string $key, $value): void {
@@ -109,7 +109,7 @@ abstract class SessionNamespace {
      *
      * @param string $key
      * @param mixed  $default
-     * 
+     *
      * @return mixed
      */
     public static function get(string $key, $default = null) {
@@ -121,7 +121,7 @@ abstract class SessionNamespace {
      * Check if key exists.
      *
      * @param string $key
-     * 
+     *
      * @return bool
      */
     public static function has(string $key): bool {
@@ -133,7 +133,7 @@ abstract class SessionNamespace {
      * Delete a key.
      *
      * @param string $key
-     * 
+     *
      * @return void
      */
     public static function delete(string $key): void {
@@ -168,7 +168,7 @@ abstract class SessionNamespace {
      *
      * @param string $key
      * @param mixed  $value
-     * 
+     *
      * @return void
      */
     public static function flash(string $key, $value): void {
@@ -181,7 +181,7 @@ abstract class SessionNamespace {
      *
      * @param string $key
      * @param mixed  $default
-     * 
+     *
      * @return mixed
      */
     public static function getFlash(string $key, $default = null) {
@@ -193,7 +193,7 @@ abstract class SessionNamespace {
      * Check if flash exists.
      *
      * @param string $key
-     * 
+     *
      * @return bool
      */
     public static function hasFlash(string $key): bool {
@@ -217,7 +217,7 @@ abstract class SessionNamespace {
      * Regenerate session ID.
      *
      * @param bool $deleteOld
-     * 
+     *
      * @return void
      */
     public static function regenerate(bool $deleteOld = true): void {

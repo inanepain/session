@@ -8,7 +8,7 @@
  * $Id$
  * $Date$
  *
- * PHP version 8.4
+ * PHP version 8.5
  *
  * @author Philip Michael Raab <philip@cathedral.co.za>
  * @package inanepain\session
@@ -27,8 +27,7 @@ namespace Inane\Session;
 use Inane\Datetime\Timespan;
 use Inane\Stdlib\Exception\{
     InvalidArgumentException,
-    RuntimeException
-};
+    RuntimeException};
 
 use function array_merge;
 use function ini_get;
@@ -36,9 +35,9 @@ use function ini_set;
 use function is_int;
 use function is_string;
 use function session_destroy;
+use function session_gc;
 use function session_get_cookie_params;
 use function session_id;
-use function session_gc;
 use function session_name;
 use function session_regenerate_id;
 use function session_start;
