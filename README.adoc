@@ -1,4 +1,5 @@
 = inanepain/session image:./icon.png[title=inanepain/session,25]
+// tag::tagConfig[]
 :author: Philip Michael Raab
 :email: <philip@cathedral.co.za>
 :description: A lightweight, secure and extensible PHP session handling library.
@@ -19,6 +20,7 @@
 :pkg-vendor: inanepain
 :pkg-name: session
 :pkg-id: {pkg-vendor}/{pkg-name}
+// end::tagConfig[]
 
 == image:./icon.png[title={pkg-id},25] {pkg-id}
 
