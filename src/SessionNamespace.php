@@ -10,17 +10,17 @@
  *
  * PHP version 8.5
  *
- * @author Philip Michael Raab <philip@cathedral.co.za>
- * @package inanepain\session
+ * @author   Philip Michael Raab <philip@cathedral.co.za>
+ * @package  inanepain\session
  * @category session
  *
- * @license UNLICENSE
- * @license https://unlicense.org/UNLICENSE UNLICENSE
+ * @license  UNLICENSE
+ * @license  https://unlicense.org/UNLICENSE UNLICENSE
  *
  * _version_ $version
  */
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Inane\Session;
 
@@ -70,6 +70,7 @@ abstract class SessionNamespace {
      */
     protected static function namespace(): string {
         $ns = defined('static::NAMESPACE') ? static::NAMESPACE : '';
+
         return $ns !== '' ? $ns : static::getDefaultNamespace();
     }
 
@@ -91,6 +92,7 @@ abstract class SessionNamespace {
     }
 
     #region Core session proxies (namespaced)
+
     /**
      * Set a value in this class's namespace.
      *
@@ -114,6 +116,7 @@ abstract class SessionNamespace {
      */
     public static function get(string $key, $default = null) {
         self::boot();
+
         return SessionManager::get($key, $default);
     }
 
@@ -126,6 +129,7 @@ abstract class SessionNamespace {
      */
     public static function has(string $key): bool {
         self::boot();
+
         return SessionManager::has($key);
     }
 
@@ -148,6 +152,7 @@ abstract class SessionNamespace {
      */
     public static function all(): array {
         self::boot();
+
         return SessionManager::all();
     }
 
@@ -186,6 +191,7 @@ abstract class SessionNamespace {
      */
     public static function getFlash(string $key, $default = null) {
         self::boot();
+
         return SessionManager::getFlash($key, $default);
     }
 
@@ -198,6 +204,7 @@ abstract class SessionNamespace {
      */
     public static function hasFlash(string $key): bool {
         self::boot();
+
         return SessionManager::hasFlash($key);
     }
     #endregion Flash Messages (namespaced)
@@ -210,6 +217,7 @@ abstract class SessionNamespace {
      */
     public static function id(): string {
         self::boot();
+
         return SessionManager::id();
     }
 

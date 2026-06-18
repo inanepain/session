@@ -10,17 +10,17 @@
  *
  * PHP version 8.5
  *
- * @author Philip Michael Raab <philip@cathedral.co.za>
- * @package inanepain\session
+ * @author   Philip Michael Raab <philip@cathedral.co.za>
+ * @package  inanepain\session
  * @category session
  *
- * @license UNLICENSE
- * @license https://unlicense.org/UNLICENSE UNLICENSE
+ * @license  UNLICENSE
+ * @license  https://unlicense.org/UNLICENSE UNLICENSE
  *
  * _version_ $version
  */
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Inane\Session;
 
@@ -79,6 +79,7 @@ class SessionManager {
 
     /** @var int Session-ID regeneration interval in seconds (default 10 min) */
     private static int $regenerateInterval = 600;
+
     #endregion Properties
 
     #region Initialisation
@@ -105,30 +106,35 @@ class SessionManager {
      *     name?: string,
      *     gc_maxlifetime?: int,
      *     remember_me?: bool          // Enable persistent session (30 days lifetime)
-     * } $options
+     * }                          $options
      */
     public static function init(array $options = []): void {
         if (self::$initialised) return;
 
         $defaults = [
-            'cookie_lifetime' => 0,                                 // 0 = expires on browser close
-            'cookie_path'     => '/',
-            'cookie_domain'   => '',
-            'cookie_secure'   => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
-            'cookie_httponly' => true,
-            'cookie_samesite' => 'Lax',                              // Lax | Strict | None
-            'use_strict_mode' => true,
+            'cookie_lifetime'  => 0,
+            // 0 = expires on browser close
+            'cookie_path'      => '/',
+            'cookie_domain'    => '',
+            'cookie_secure'    => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+            'cookie_httponly'  => true,
+            'cookie_samesite'  => 'Lax',
+            // Lax | Strict | None
+            'use_strict_mode'  => true,
             'use_only_cookies' => true,
-            'name'            => 'PHPSESSID',
-            'gc_maxlifetime'  => 1440,
-            'remember_me'     => false,                              // Persistent session (cookie_lifetime = 30 days)
+            'name'             => 'PHPSESSID',
+            'gc_maxlifetime'   => 1440,
+            'remember_me'      => false,
+            // Persistent session (cookie_lifetime = 30 days)
         ];
 
         $config = array_merge($defaults, $options);
 
         // NEW: Handle 'remember_me' – set persistent lifetime if enabled
         if ($config['remember_me'] && $config['cookie_lifetime'] === 0) {
-            $config['cookie_lifetime'] = Timespan::fromDuration('30days')->getSeconds();
+            $config['cookie_lifetime'] = Timespan::fromDuration('30days')
+                ->getSeconds()
+            ;
         }
 
         // -----------------------------------------------------------------
@@ -138,13 +144,13 @@ class SessionManager {
 
         ini_set('session.use_only_cookies', $config['use_only_cookies'] ? '1' : '0');
         ini_set('session.use_strict_mode', $config['use_strict_mode'] ? '1' : '0');
-        ini_set('session.cookie_lifetime', (string) $config['cookie_lifetime']);
+        ini_set('session.cookie_lifetime', (string)$config['cookie_lifetime']);
         ini_set('session.cookie_path', $config['cookie_path']);
         ini_set('session.cookie_domain', $config['cookie_domain']);
         ini_set('session.cookie_secure', $config['cookie_secure'] ? '1' : '0');
         ini_set('session.cookie_httponly', $config['cookie_httponly'] ? '1' : '0');
         ini_set('session.cookie_samesite', $config['cookie_samesite']);
-        ini_set('session.gc_maxlifetime', (string) $config['gc_maxlifetime']);
+        ini_set('session.gc_maxlifetime', (string)$config['gc_maxlifetime']);
 
         // -----------------------------------------------------------------
         // Start the session
@@ -168,25 +174,27 @@ class SessionManager {
 
     #region Remember me utilities
     /**
-     * Enable "remember me" for the current session (persists after browser close).
+     * Enable the "Remember Me" functionality by setting the session lifetime.
      *
-     * Sets cookie_lifetime to 30 days and updates session config.
-     * Call after `init()`; regenerates ID for security.
-     *
-     * @param int|string|Timespan $lifetime Optional custom lifetime in seconds (default: 30 days).
+     * @param int|string|Timespan $lifetime The duration for the session lifetime. It can be specified
+     *                                      as an integer (seconds), a string (duration like "30days"),
+     *                                      or a Timespan instance.
      *
      * @return void
+     *
+     * @throws RuntimeException If session initialization or regeneration fails.
      */
     public static function enableRememberMe(int|string|Timespan $lifetime = '30days'): void {
-        $lifetime = match(true) {
+        $lifetime = match (true) {
             is_int($lifetime) => $lifetime,
-            is_string($lifetime) => Timespan::fromDuration($lifetime)->getSeconds(),
+            is_string($lifetime) => Timespan::fromDuration($lifetime)
+                ->getSeconds(),
             default => $lifetime->getSeconds(),
         };
 
         self::ensureInitialised();
-        ini_set('session.cookie_lifetime', (string) $lifetime);
-        self::regenerate(true);  // Regenerate ID on enable for security
+        ini_set('session.cookie_lifetime', (string)$lifetime);
+        self::regenerate(true);  // Regenerate ID on enabling for security
     }
 
     /**
@@ -202,13 +210,16 @@ class SessionManager {
     }
 
     /**
-     * Check if current session is "remember me" (persistent).
+     * Determine if the "remember me" functionality is enabled based on session cookie lifetime.
      *
      * @return bool
+     *
+     * @throws RuntimeException If the session is not properly initialised.
      */
     public static function isRememberMe(): bool {
         self::ensureInitialised();
-        return (int) ini_get('session.cookie_lifetime') > 0;
+
+        return ((int)ini_get('session.cookie_lifetime')) > 0;
     }
     #endregion Remember me utilities
 
@@ -276,6 +287,7 @@ class SessionManager {
      */
     public static function get(string $key, $default = null) {
         self::ensureInitialised();
+
         return $_SESSION[self::$namespace][$key] ?? $default;
     }
 
@@ -288,6 +300,7 @@ class SessionManager {
      */
     public static function has(string $key): bool {
         self::ensureInitialised();
+
         return isset($_SESSION[self::$namespace][$key]);
     }
 
@@ -333,6 +346,7 @@ class SessionManager {
         self::ensureInitialised();
         $value = $_SESSION[self::$flashKey][$key] ?? $default;
         unset($_SESSION[self::$flashKey][$key]);
+
         return $value;
     }
 
@@ -345,6 +359,7 @@ class SessionManager {
      */
     public static function hasFlash(string $key): bool {
         self::ensureInitialised();
+
         return isset($_SESSION[self::$flashKey][$key]);
     }
 
@@ -383,7 +398,7 @@ class SessionManager {
      */
     private static function regenerateIfNeeded(): void {
         $lastRegen = self::get('__last_regen__', 0);
-        $now       = time();
+        $now = time();
 
         if ($now - $lastRegen > self::$regenerateInterval) {
             self::regenerate();
@@ -426,6 +441,7 @@ class SessionManager {
         $lastActivity = self::get('__last_activity__', time());
         if (time() - $lastActivity > self::$timeout) {
             self::destroy();
+
             return;
         }
         self::updateActivity();
@@ -464,7 +480,7 @@ class SessionManager {
                 $params['path'],
                 $params['domain'],
                 $params['secure'],
-                $params['httponly']
+                $params['httponly'],
             );
         }
 
@@ -479,6 +495,7 @@ class SessionManager {
      */
     public static function all(): array {
         self::ensureInitialised();
+
         return $_SESSION[self::$namespace] ?? [];
     }
 
@@ -499,22 +516,23 @@ class SessionManager {
      */
     public static function id(): string {
         self::ensureInitialised();
+
         return session_id();
     }
     #endregion Destruction / Utilities
 
     #region Internal Helpers
     /**
-     * Throw if `init()` has not been called.
+     * Ensures that the SessionManager is properly initialised before use.
      *
      * @return void
      *
-     * @throws RuntimeException
+     * @throws RuntimeException If the SessionManager has not been initialised with init().
      */
     private static function ensureInitialised(): void {
         if (!self::$initialised) {
             throw new RuntimeException(
-                'SessionManager must be initialised with SessionManager::init() before use.'
+                'SessionManager must be initialised with SessionManager::init() before use.',
             );
         }
         if (!isset($_SESSION[self::$namespace])) {
