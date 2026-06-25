@@ -204,10 +204,10 @@ class SessionManager {
      *
      * @return void
      */
-    public static function disableRememberMe(): void {
-        self::ensureInitialised();
-        ini_set('session.cookie_lifetime', '0');
-    }
+//    public static function disableRememberMe(): void {
+//        self::ensureInitialised();
+//        ini_set('session.cookie_lifetime', '0');
+//    }
 
     /**
      * Determine if the "remember me" functionality is enabled based on session cookie lifetime.

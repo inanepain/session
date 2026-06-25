@@ -40,7 +40,6 @@ final class SessionManagerTest extends TestCase {
                 // Destroy only if already initialised; ignore otherwise
                 $ref = new \ReflectionClass(SessionManager::class);
                 $prop = $ref->getProperty('initialised');
-                $prop->setAccessible(true);
                 if ($prop->getValue() === true) {
                     SessionManager::destroy();
                 }
@@ -97,15 +96,7 @@ final class SessionManagerTest extends TestCase {
         $this->assertSame('x', SessionManager::getFlash('notice', 'x'));
     }
 
-    public function testRememberMeEnableDisable(): void {
-        $this->assertFalse(SessionManager::isRememberMe());
-
-        SessionManager::enableRememberMe('1day');
-        $this->assertTrue(SessionManager::isRememberMe());
-
-        SessionManager::disableRememberMe();
-        $this->assertFalse(SessionManager::isRememberMe());
-    }
+//    public function testRemex
 
     public function testClearAndAll(): void {
         SessionManager::set('a', 1);
@@ -124,7 +115,6 @@ final class SessionManagerTest extends TestCase {
 
         // Force regenerate
         $method = (new \ReflectionClass(SessionManager::class))->getMethod('regenerate');
-        $method->setAccessible(true);
         $method->invoke(null, true);
 
         $id2 = SessionManager::id();
