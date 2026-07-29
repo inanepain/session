@@ -29,6 +29,11 @@
             "Inane\\Session\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Inane\\Session\\Tests\\": "tests/"
+        }
+    },
     "config": {
         "preferred-install": "dist",
         "optimize-autoloader": true,
