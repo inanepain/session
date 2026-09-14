@@ -76,7 +76,7 @@ composer require {pkg-id}
 = Quick Start
 
 == Basic Usage
-Require the file and initialize:
+Require the file and initialise:
 
 [source,php]
 ----
